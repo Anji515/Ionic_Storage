@@ -9,6 +9,7 @@ import {
   IonItemOption,
   IonItemOptions,
   IonItemSliding,
+  IonLabel,
   IonList,
   IonPage,
   IonTitle,
@@ -16,35 +17,35 @@ import {
 } from "@ionic/react";
 import "./Home.css";
 import { useStorage } from "../hooks/useStorage";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
-  arrowBackCircleSharp,
   arrowUndoCircleSharp,
   checkmarkDoneCircleSharp,
-  closeCircle,
-  closeCircleOutline,
-  eyeOffSharp,
   trashBinSharp,
 } from "ionicons/icons";
 
 const Home: React.FC = () => {
-  const { todos, addTodo } = useStorage();
+  const { todos, addTodo, updateTodoItem } = useStorage();
   const [task, setTask] = useState<string>("");
+  const ionList = useRef(null as any)
+
+
   const handleChange = (e: CustomEvent<InputChangeEventDetail>) => {
     console.log("e.detail.value", e.detail.value);
     setTask(e.detail.value as string);
   };
   const CreateTodo = async () => {
     await addTodo(task);
-    await setTask("");
+    setTask("");
   };
 
   const UpdateTodo = async (id: string, status: boolean) => {
-    // setTask('')
+    ionList.current.closeSlidingItems()
+    await updateTodoItem(id,status)
   };
 
   const DeleteTodo = async (id: string) => {
-    // setTask('')
+    ionList.current.closeSlidingItems()
   };
 
   return (
@@ -65,12 +66,17 @@ const Home: React.FC = () => {
             Add
           </IonButton>
         </IonItem>
-        <IonList>
+        <IonList ref={ionList}>
           {todos?.map((todo, i) => (
             <IonItemSliding key={i}>
-              <IonItem>{todo?.task}</IonItem>
+              <IonItem> 
+                <IonLabel>
+                {todo?.task}
+                </IonLabel>
+                {todo?.status ? 'Completed' : 'Pending'}
+                </IonItem>
               <IonItemOptions side="start">
-                <IonItemOption color={"danger"}>
+                <IonItemOption color={"danger"} onClick={() => DeleteTodo(todo?.id)}>
                   <IonIcon size="large" icon={trashBinSharp} />
                 </IonItemOption>
               </IonItemOptions>

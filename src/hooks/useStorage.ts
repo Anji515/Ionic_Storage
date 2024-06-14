@@ -41,8 +41,16 @@ export const useStorage = () => {
     store?.set(TODO_KEY, UpdatedTodos);
   };
 
+  const updateTodoItem = async (id: string, status: boolean)=>{
+    const toUpdate = [...todos]
+    let todo = toUpdate.filter(todo => todo.id === id)[0]
+    todo.status = status
+    setTodos(toUpdate)
+    return store?.set(TODO_KEY, toUpdate)
+  }
   return {
     todos,
     addTodo,
+    updateTodoItem
   };
 };

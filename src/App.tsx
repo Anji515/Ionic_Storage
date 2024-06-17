@@ -32,6 +32,10 @@ import '@ionic/react/css/palettes/dark.system.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { ADD_NEXT_STEPS, ADD_PATIENT_PROFILE, ADD_PATIENT_VITALS } from './constants/routes';
+import AddPatientProfile from './pages/PatientProfile';
+import VitalInformation from './pages/AddVitalInfo';
+import NextStepForm from './pages/NextStepFrom';
 
 setupIonicReact();
 
@@ -45,6 +49,9 @@ const App: React.FC = () => (
         <Route exact path="/">
           <Redirect to="/home" />
         </Route>
+        <Route path={ADD_PATIENT_PROFILE} component={AddPatientProfile} />
+        <Route path={ADD_PATIENT_VITALS} component={VitalInformation} />
+        <Route path={ADD_NEXT_STEPS} component={NextStepForm} />
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>

@@ -1,56 +1,71 @@
-import { Storage } from "@ionic/storage";
-import { useEffect, useState } from "react";
-
-const TODO_KEY = "my-todos";
-export interface TODO_ITEM {
+import {  Drivers, Storage } from "@ionic/storage";
+import { useEffect, useState, useId } from "react";
+import { PatientProfile } from "../pages/AddPatientProfile.types";
+import { VitalInfoForm } from "../pages/AddVitalInfo.types";
+import { FollowupInfo } from "../pages/NextSteps.types";
+import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver'
+const PATIENTS_KEY = "patients";
+export interface PatientInfo {
   id: string;
-  task: string;
-  status: boolean;
+  profile: PatientProfile;
+  vitals: VitalInfoForm;
+  // consultation: {};
+  nextSteps: FollowupInfo;
 }
+
 export const useStorage = () => {
   const [store, setStore] = useState<Storage>();
-  const [todos, setTodos] = useState<TODO_ITEM[]>([]);
+  const  patientProfile = JSON.parse(localStorage.getItem('patientInfo')!)
+  const  patientVitals = JSON.parse(localStorage.getItem('vitalInfo')!)
+  const  patientNextSteps = JSON.parse(localStorage.getItem('followupInfo')!)
+  let uuid = self.crypto.randomUUID();
+  console.log('uuid',uuid);
+  const [patients, setPatients] = useState<PatientInfo[]>([]);
   useEffect(() => {
     const initialStorage = async () => {
       const newStore = new Storage({
         name: "Anji_Db",
-        // version: "number",
-        // size: "number",
-        // storeName: "string",
-        // description: "string",
-        // driverOrder: "",
-        // dbKey: "string",
+        // driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
       });
+      // await newStore.defineDriver(CordovaSQLiteDriver)
       const store = await newStore.create();
       setStore(store);
-      const TodosStored = (await store.get(TODO_KEY)) || [];
-      console.log("TodosStored", TodosStored);
-      setTodos(TodosStored);
+      const patientsStored = (await store.get(PATIENTS_KEY)) || [];
+      console.log("patientsStored", patientsStored);
+      setPatients(patientsStored);
     };
     initialStorage();
   }, []);
-
-  const addTodo = async (task: string) => {
-    const newTodo = {
-      id: "" + new Date().getTime(),
-      status: true,
-      task,
+  console.log('newPatientInfo', patientProfile, patientVitals, patientNextSteps);
+  const addItem = async () => {
+    if (!patientProfile || !patientVitals || !patientNextSteps) {
+      console.error("All form data must be provided before adding item");
+      return;
+    }
+    
+    const newPatientInfo: PatientInfo = {
+      id: ""+new Date().getTime() + Math.floor(Math.random() * 1000),
+      profile: patientProfile,
+      vitals: patientVitals,
+      nextSteps: patientNextSteps,
     };
-    const UpdatedTodos = [...todos, newTodo]
-    setTodos(UpdatedTodos);
-    store?.set(TODO_KEY, UpdatedTodos);
+    
+    
+    const UpdatedPatients = [...patients, newPatientInfo];
+    setPatients(UpdatedPatients);
+    store?.set(PATIENTS_KEY, UpdatedPatients);
   };
 
-  const updateTodoItem = async (id: string, status: boolean)=>{
-    const toUpdate = [...todos]
-    let todo = toUpdate.filter(todo => todo.id === id)[0]
-    todo.status = status
-    setTodos(toUpdate)
-    return store?.set(TODO_KEY, toUpdate)
-  }
   return {
-    todos,
-    addTodo,
-    updateTodoItem
+    patients,
+    addItem,
   };
 };
+
+// const updateTodoItem = async (id: string, status: boolean)=>{
+//   const toUpdate = [...patients]
+//   let patient = toUpdate.filter(patient => patient.id === id)[0]
+//   patient.status = status
+//   setPatients(toUpdate)
+//   return store?.set(PATIENTS_KEY, toUpdate)
+// }

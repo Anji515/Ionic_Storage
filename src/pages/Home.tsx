@@ -23,30 +23,38 @@ import {
   checkmarkDoneCircleSharp,
   trashBinSharp,
 } from "ionicons/icons";
+import { useHistory } from "react-router";
+import { ADD_PATIENT_PROFILE } from "../constants/routes";
+import useNetworkStatus from "../hooks/useNetworkDetector";
+
 
 const Home: React.FC = () => {
-  const { todos, addTodo, updateTodoItem } = useStorage();
+  const isOnline = useNetworkStatus()
+  console.log('isOnline',isOnline);
+
+  
+  
+  const { patients, addItem } = useStorage();
   const [task, setTask] = useState<string>("");
-  const ionList = useRef(null as any)
+  const ionList = useRef(null as any);
+  const history = useHistory();
 
-
-  const handleChange = (e: CustomEvent<InputChangeEventDetail>) => {
-    console.log("e.detail.value", e.detail.value);
-    setTask(e.detail.value as string);
-  };
-  const CreateTodo = async () => {
-    await addTodo(task);
-    setTask("");
-  };
-
-  const UpdateTodo = async (id: string, status: boolean) => {
-    ionList.current.closeSlidingItems()
-    await updateTodoItem(id,status)
+  // const handleChange = (e: CustomEvent<InputChangeEventDetail>) => {
+  //   console.log("e.detail.value", e.detail.value);
+  //   setTask(e.detail.value as string);
+  // };
+  const handleAddPatient = async () => {
+    history.push(ADD_PATIENT_PROFILE);
   };
 
-  const DeleteTodo = async (id: string) => {
-    ionList.current.closeSlidingItems()
-  };
+  // const UpdateTodo = async (id: string, status: boolean) => {
+  //   ionList.current.closeSlidingItems()
+  //   await updateTodoItem(id,status)
+  // };
+
+  // const DeleteTodo = async (id: string) => {
+  //   ionList.current.closeSlidingItems()
+  // };
 
   return (
     <IonPage>
@@ -56,40 +64,66 @@ const Home: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonItem>
+        <IonItem style={{ width: "80%", margin: "auto" }}>
           <IonInput
             value={task}
-            onIonInput={handleChange}
-            placeholder="Add a new todo"
+            // onIonInput={handleChange}
+            placeholder="Search Patient by id, name and identity..."
+            clearInput
           />
-          <IonButton slot="end" fill="clear" onClick={() => CreateTodo()}>
-            Add
+          <IonButton style={{ width: "20%" }} onClick={handleAddPatient}>
+            Add Patients
           </IonButton>
         </IonItem>
-        <IonList ref={ionList}>
-          {todos?.map((todo, i) => (
+        <IonList
+          ref={ionList}
+          className="ion-no-padding"
+          style={{
+            width: "70%",
+            margin: "auto",
+            marginTop: "30px",
+            border: "0px solid gray",
+            padding: "20px",
+          }}
+        >
+          <IonItem>
+            <IonLabel>Name</IonLabel>
+            <IonLabel>Gender</IonLabel>
+            <IonLabel>Age</IonLabel>
+            <IonLabel>Contact Nuber</IonLabel>
+            <IonLabel>Identity Type</IonLabel>
+            <IonLabel>Identity Number</IonLabel>
+            <IonLabel>Email</IonLabel>
+          </IonItem>
+          {patients?.map((todo, i) => (
             <IonItemSliding key={i}>
-              <IonItem> 
-                <IonLabel>
-                {todo?.task}
-                </IonLabel>
-                {todo?.status ? 'Completed' : 'Pending'}
-                </IonItem>
+              <IonItem>
+                <IonLabel>{todo?.profile?.name}</IonLabel>
+                <IonLabel>{todo?.profile?.gender}</IonLabel>
+                <IonLabel>{todo?.profile?.age}</IonLabel>
+                <IonLabel>{todo?.profile?.contactNumber}</IonLabel>
+                <IonLabel>{todo?.profile?.identityType?.toLocaleLowerCase()}</IonLabel>
+                <IonLabel>{todo?.profile?.identityNumber}</IonLabel>
+                <IonLabel>{todo?.profile?.email}</IonLabel>
+              </IonItem>
               <IonItemOptions side="start">
-                <IonItemOption color={"danger"} onClick={() => DeleteTodo(todo?.id)}>
+                <IonItemOption
+                  color={"danger"}
+                  // onClick={() => DeleteTodo(todo?.id)}
+                >
                   <IonIcon size="large" icon={trashBinSharp} />
                 </IonItemOption>
               </IonItemOptions>
               <IonItemOptions side="end">
                 <IonItemOption
                   color={"primary"}
-                  onClick={() => UpdateTodo(todo?.id, false)}
+                  // onClick={() => UpdateTodo(todo?.id, false)}
                 >
                   <IonIcon size="large" icon={arrowUndoCircleSharp} />
                 </IonItemOption>
                 <IonItemOption
                   color={"success"}
-                  onClick={() => UpdateTodo(todo?.id, true)}
+                  // onClick={() => UpdateTodo(todo?.id, true)}
                 >
                   <IonIcon size="large" icon={checkmarkDoneCircleSharp} />
                 </IonItemOption>

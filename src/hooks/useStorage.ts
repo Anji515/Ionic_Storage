@@ -3,7 +3,7 @@ import { useEffect, useState, useId } from "react";
 import { PatientProfile } from "../pages/AddPatientProfile.types";
 import { VitalInfoForm } from "../pages/AddVitalInfo.types";
 import { FollowupInfo } from "../pages/NextSteps.types";
-import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver'
+import cordovaSQLiteDriver from 'localforage-cordovasqlitedriver'
 const PATIENTS_KEY = "patients";
 export interface PatientInfo {
   id: string;
@@ -18,25 +18,22 @@ export const useStorage = () => {
   const  patientProfile = JSON.parse(localStorage.getItem('patientInfo')!)
   const  patientVitals = JSON.parse(localStorage.getItem('vitalInfo')!)
   const  patientNextSteps = JSON.parse(localStorage.getItem('followupInfo')!)
-  let uuid = self.crypto.randomUUID();
-  console.log('uuid',uuid);
   const [patients, setPatients] = useState<PatientInfo[]>([]);
+
   useEffect(() => {
     const initialStorage = async () => {
       const newStore = new Storage({
         name: "Anji_Db",
-        // driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
+        driverOrder: [cordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
       });
-      // await newStore.defineDriver(CordovaSQLiteDriver)
+      await newStore.defineDriver(cordovaSQLiteDriver)
       const store = await newStore.create();
       setStore(store);
       const patientsStored = (await store.get(PATIENTS_KEY)) || [];
-      console.log("patientsStored", patientsStored);
       setPatients(patientsStored);
     };
     initialStorage();
   }, []);
-  console.log('newPatientInfo', patientProfile, patientVitals, patientNextSteps);
   const addItem = async () => {
     if (!patientProfile || !patientVitals || !patientNextSteps) {
       console.error("All form data must be provided before adding item");

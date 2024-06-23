@@ -12,8 +12,11 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonRefresher,
+  IonRefresherContent,
   IonTitle,
   IonToolbar,
+  RefresherEventDetail,
 } from "@ionic/react";
 import "./Home.css";
 import { useStorage } from "../hooks/useStorage";
@@ -21,18 +24,16 @@ import { useRef, useState } from "react";
 import {
   arrowUndoCircleSharp,
   checkmarkDoneCircleSharp,
+  chevronDownCircleOutline,
   trashBinSharp,
 } from "ionicons/icons";
 import { useHistory } from "react-router";
 import { ADD_PATIENT_PROFILE } from "../constants/routes";
-import useNetworkStatus from "../hooks/useNetworkDetector";
+import useDetectInternet from "../hooks/useReactNetworkDetector";
 
 
 const Home: React.FC = () => {
-  const isOnline = useNetworkStatus()
-  console.log('isOnline',isOnline);
-
-  
+  const isOnline = useDetectInternet()
   
   const { patients, addItem } = useStorage();
   const [task, setTask] = useState<string>("");
@@ -55,15 +56,27 @@ const Home: React.FC = () => {
   // const DeleteTodo = async (id: string) => {
   //   ionList.current.closeSlidingItems()
   // };
-
+  function handleRefresh(event: CustomEvent<RefresherEventDetail>) {
+    setTimeout(() => {
+      event.detail.complete();
+      window.location.reload();
+    }, 1000);
+  }
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar color={"primary"}>
-          <IonTitle>My Todo's</IonTitle>
+          <IonTitle>Patients List</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
+      <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent
+            // pullingIcon={chevronDownCircleOutline}
+            // refreshingSpinner="circles"
+            // refreshingText="Refreshing..."
+          ></IonRefresherContent>
+        </IonRefresher>
         <IonItem style={{ width: "80%", margin: "auto" }}>
           <IonInput
             value={task}
